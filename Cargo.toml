@@ -4,3 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+dbn = "0.44.0"
+dbn-cli = "0.44.0"
+dbn-macros = "0.44.0"
