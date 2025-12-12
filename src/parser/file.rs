@@ -2,20 +2,12 @@ use color_eyre::eyre::Result;
 use std::{
     fs,
     num::NonZero,
-    path::PathBuf
+    path::PathBuf,
 };
 use std::ffi::OsStr;
 
 use crate::parser::dbn;
 use crate::Config;
-
-pub fn run(config: Config) -> Result<()> {
-    for path in get_files(&config)?{
-        dbn::dbn_stream(&path, Some(config.start_unix()?), Some(config.end_unix()?))?;
-    }
-
-    Ok(())
-}
 
 //gets the proper files to be run from the directory
 pub fn get_files(config: &Config) -> Result<Vec<PathBuf>> {
@@ -33,11 +25,9 @@ pub fn get_files(config: &Config) -> Result<Vec<PathBuf>> {
 
         if config.start_unix()? <= file_metadata.start && file_metadata.start <= config.end_unix()? ||
         Some(NonZero::new(config.start_unix()?).unwrap()) <= file_metadata.end && file_metadata.end <= Some(NonZero::new(config.end_unix()?).unwrap()) {
-            files_in_dir.push(path);
+            files_in_dir.push(path)
         }
     }
-
-    assert!(files_in_dir.len() != 0);
 
     Ok(files_in_dir)
 }
@@ -47,23 +37,23 @@ pub fn get_files(config: &Config) -> Result<Vec<PathBuf>> {
 mod test {
     use super::*;
 
+    use crate::helper;
+
     #[test]
     pub fn get_files() -> Result<()> {
         println!("-----get_files-----");
 
-        let config = Config::new(
-            "C:/Users/helto/GLBX-20250915-NGKNUL4VBG".to_string(),
-            "2025-05-14".to_string(),
-            "2025-05-23".to_string(),
-        )?;
+        let dir = helper::str_to_pathbuf("C:/Users/helto/GLBX-20250915-NGKNUL4VBG".to_string())?;
+        let start = helper::str_to_naivedate("2025-05-14".to_string()).unwrap();
+        let end = helper::str_to_naivedate("2025-05-23".to_string()).unwrap();
 
-        println!("config: {:#?}", config);
-        println!("start_unix: {}", config.start_unix()?);
-        println!("end_unix: {}", config.end_unix()?);
+        println!("dir: {:#?}", &dir);
+        println!("start: {}", &start);
+        println!("end: {}", &end);
 
-        let mut files_in_dir = Vec::new();
+        let mut files_in_dir = PathBuf::new();
 
-        for file in fs::read_dir(config.dir())? {
+        for file in fs::read_dir(&dir)? {
             let file = file?;
             let path = file.path();
 
@@ -78,8 +68,8 @@ mod test {
             println!("file_metadata.start: {:#?}", file_metadata.start);
             println!("file_metadata.end: {:#?}", file_metadata.end);
 
-            if config.start_unix()? <= file_metadata.start && file_metadata.start <= config.end_unix()? ||
-            Some(NonZero::new(config.start_unix()?).unwrap()) <= file_metadata.end && file_metadata.end <= Some(NonZero::new(config.end_unix()?).unwrap()) {
+            if helper::to_unix(&start)? <= file_metadata.start && file_metadata.start <= helper::to_unix(&end)? ||
+            Some(NonZero::new(helper::to_unix(&start)?).unwrap()) <= file_metadata.end && file_metadata.end <= Some(NonZero::new(helper::to_unix(&end)?).unwrap()) {
                 files_in_dir.push(path);
             }
         }

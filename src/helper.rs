@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use chrono::{
     NaiveDate,
     NaiveTime,
@@ -12,3 +13,6 @@ pub fn to_unix(date: &NaiveDate) -> Result<u64> {
 
     Ok(dt_unix * 1_000_000_000)
 }
+
+pub fn str_to_pathbuf(str: String) -> Result<PathBuf> { Ok(PathBuf::from(str)) }
+pub fn str_to_naivedate(str: String) -> Result<NaiveDate> { Ok(NaiveDate::parse_from_str(&str, "%Y-%m-%d")?) }

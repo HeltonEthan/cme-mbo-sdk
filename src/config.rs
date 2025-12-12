@@ -15,12 +15,12 @@ pub struct Config {
 
 impl Config {
     //dates formatted as %Y-%m-%d (ie. 2024-03-10)
-    pub fn new(dir: String, start: String, end: String) -> Result<Self> {
-        Ok(Self{
-            dir: PathBuf::from(dir),
-            start: NaiveDate::parse_from_str(&start, "%Y-%m-%d")?,
-            end: NaiveDate::parse_from_str(&end, "%Y-%m-%d")?,
-        })
+    pub fn new(
+        dir: PathBuf,
+        start: NaiveDate,
+        end: NaiveDate,
+    ) -> Self {
+        Self{ dir, start, end }
     }
 
     pub fn dir(&self) -> &PathBuf { &self.dir }
