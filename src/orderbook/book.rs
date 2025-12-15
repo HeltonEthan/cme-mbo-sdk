@@ -113,6 +113,8 @@ impl Book {
         if mbo.flags.is_tob() {
             let levels: &mut BTreeMap<i64, Level> = self.side_levels_mut(side);
             levels.clear();
+            // UNDEF_PRICE indicates the side's book should be cleared
+            // and doesn't represent an order that should be added
             if mbo.price != UNDEF_PRICE {
                 levels.insert(price, VecDeque::from([mbo]));
             }

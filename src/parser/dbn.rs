@@ -48,6 +48,10 @@ pub fn decode_metadata(path: &PathBuf) -> Result<dbn::Metadata> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use ::dbn::SymbolIndex;
+
+    use crate::helper;
+    use crate::parser::dbn;
 
     #[test]
     pub fn dbn_stream() -> Result<()> {
@@ -69,6 +73,45 @@ mod test {
                 }
             }
             _ = mbo_msg;
+        }
+        Ok(())
+    }
+
+    #[test]
+    pub fn run() -> Result<()> {
+        let cfg = Config::new(
+            helper::str_to_pathbuf("C:/Users/helto/GLBX-20250915-NGKNUL4VBG".to_string())?,
+            helper::str_to_naivedate("2025-05-12".to_string()).unwrap(),
+            helper::str_to_naivedate("2025-05-17".to_string()).unwrap(),
+        );
+        let start_unix = cfg.start_unix()?;
+        let end_unix = cfg.end_unix()?;
+        let mut market = Market::default();
+        for path in file::get_files(&cfg)?.iter() {
+            let mut dbn_stream = Decoder::from_zstd_file(path)?.decode_stream::<MboMsg>();
+            let symbol_map = dbn::decode_metadata(path)?.symbol_map()?;
+            while let Some(mbo_msg) = dbn_stream.next()? {
+                if mbo_msg.ts_recv < start_unix {
+                    continue;
+                }
+                if mbo_msg.ts_recv > end_unix {
+                    let symbol = symbol_map.get_for_rec(mbo_msg).unwrap();
+                    let (best_bid, best_offer) = market.aggregated_bbo(mbo_msg.hd.instrument_id);
+                    println!("{symbol} Aggregated BBO | {}", mbo_msg.ts_recv().unwrap());
+                    if let Some(best_offer) = best_offer {
+                        println!("    {best_offer}");
+                    } else {
+                        println!("    None");
+                    }
+                    if let Some(best_bid) = best_bid {
+                        println!("    {best_bid}");
+                    } else {
+                        println!("    None");
+                    }
+                    break;
+                }
+                market.apply(mbo_msg.clone());
+            }
         }
         Ok(())
     }
