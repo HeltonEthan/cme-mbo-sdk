@@ -12,6 +12,7 @@ use std::{fs::File, io::BufReader, path::PathBuf};
 
 use crate::Config;
 use crate::parser::file;
+use crate::orderbook::market::Market;
 
 //run function that starts a backtest
 //uses a callback function to give mbo_msgs to logic
@@ -19,10 +20,10 @@ use crate::parser::file;
 pub fn run<F: FnMut(&MboMsg) -> Option<Action>>(mut logic: F, cfg: &Config) -> Result<()> {
     let start_unix = cfg.start_unix()?;
     let end_unix = cfg.end_unix()?;
-
+    let mut market = Market::default();
     for path in file::get_files(&cfg)?.iter() {
         let mut dbn_stream = Decoder::from_zstd_file(path)?.decode_stream::<MboMsg>();
-
+        let _symbol_map = decode_metadata(path)?.symbol_map()?;
         while let Some(mbo_msg) = dbn_stream.next()? {
             if mbo_msg.ts_recv < start_unix {
                 continue;
@@ -30,11 +31,10 @@ pub fn run<F: FnMut(&MboMsg) -> Option<Action>>(mut logic: F, cfg: &Config) -> R
             if mbo_msg.ts_recv > end_unix {
                 break;
             }
-
+            market.apply(mbo_msg.clone());
             logic(&mbo_msg);
         }
     }
-
     Ok(())
 }
 
@@ -56,9 +56,7 @@ mod test {
         );
         let start_unix = None;
         let end_unix = None;
-
         let mut dbn_stream = Decoder::from_zstd_file(path)?.decode_stream::<MboMsg>();
-
         while let Ok(Some(mbo_msg)) = dbn_stream.next() {
             if let Some(start_unix) = start_unix {
                 if mbo_msg.ts_recv < start_unix {
@@ -70,10 +68,8 @@ mod test {
                     break;
                 }
             }
-
             _ = mbo_msg;
         }
-
         Ok(())
     }
 
@@ -83,9 +79,7 @@ mod test {
             r"C:/Users/helto/GLBX-20250915-NGKNUL4VBG/glbx-mdp3-20250512-20250517.mbo.dbn.zst",
         );
         let reader = zstd::stream::Decoder::new(BufReader::new(File::open(path)?)).unwrap();
-
         let _decode = MetadataDecoder::new(reader).decode()?;
-
         Ok(())
     }
 }
