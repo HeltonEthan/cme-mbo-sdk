@@ -1,3 +1,6 @@
+use crate::config::Config;
+use crate::orderbook::market::Market;
+use crate::parser::file;
 use color_eyre::eyre::Result;
 use dbn::{
     Action,
@@ -9,11 +12,6 @@ use dbn::{
 };
 use fallible_streaming_iterator::FallibleStreamingIterator;
 use std::{fs::File, io::BufReader, path::PathBuf};
-use crate::{
-    config::Config
-};
-use crate::orderbook::market::Market;
-use crate::parser::file;
 
 #[inline]
 #[allow(dead_code)]

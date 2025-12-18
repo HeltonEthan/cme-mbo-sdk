@@ -24,6 +24,7 @@ impl Book {
     pub fn bid_level(&self, idx: usize) -> Option<PriceLevel> {
         self.bids
             .iter()
+            // Reverse to get highest first
             .rev()
             .nth(idx)
             .map(|(price, orders)| PriceLevel::new(*price, orders.iter()))
@@ -108,9 +109,9 @@ impl Book {
             // UNDEF_PRICE indicates the side's book should be cleared
             // and doesn't represent an order that should be added
             if mbo.price != UNDEF_PRICE {
-                assert!(levels.insert(price, VecDeque::from([mbo])).is_none());
+                levels.insert(price, VecDeque::from([mbo]));
             }
-        } else if mbo.side().unwrap() != Side::None && mbo.price.is_positive() {
+        } else {
             assert_ne!(price, UNDEF_PRICE);
             assert!(self.orders_by_id.insert(mbo.order_id, (side, price)).is_none());
             let level: &mut Level = self.get_or_insert_level(side, price);
@@ -130,6 +131,7 @@ impl Book {
             if level.is_empty() {
                 self.remove_level(side, mbo.price);
             }
+            self.orders_by_id.remove(&mbo.order_id).unwrap();
         }
     }
 

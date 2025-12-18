@@ -1,10 +1,8 @@
+use crate::config::Config;
+use crate::parser::dbn;
 use color_eyre::eyre::Result;
 use std::ffi::OsStr;
 use std::{fs, num::NonZero, path::PathBuf};
-use crate::{
-    config::Config
-};
-use crate::parser::dbn;
 
 pub fn get_files(config: &Config) -> Result<Vec<PathBuf>> {
     let mut files_in_dir = Vec::new();
