@@ -1,2 +1,3 @@
 import numpy as np
-import matplotlib as plt
+import matplotlib
+import matplotlib.pyplot as plt

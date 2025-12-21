@@ -1,12 +1,11 @@
 use crate::config::Config;
 use crate::parser::dbn;
-use color_eyre::eyre::Result;
 use std::ffi::OsStr;
 use std::{fs, num::NonZero, path::PathBuf};
 
 /// Loops through all files in the directory and creates a Vec<PathBuf>
 /// of paths that you want to run<logic>() on.
-pub fn get_files(config: &Config) -> Result<Vec<PathBuf>> {
+pub fn get_files(config: &Config) -> anyhow::Result<Vec<PathBuf>> {
     let mut files_in_dir = Vec::new();
     for file in fs::read_dir(config.dir())? {
         let file = file?;

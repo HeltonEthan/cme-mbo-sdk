@@ -13,10 +13,6 @@ pub struct Book {
 type Level = VecDeque<MboMsg>;
 
 impl Book {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
     pub fn bbo(&self) -> (Option<PriceLevel>, Option<PriceLevel>) {
         (self.bid_level(0), self.ask_level(0))
     }

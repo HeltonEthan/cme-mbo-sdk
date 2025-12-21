@@ -1,8 +1,7 @@
 use chrono::{NaiveDate, NaiveTime};
-use color_eyre::eyre::Result;
 
 /// Takes a date and returns the date in unix_nanos.
-pub fn to_unix(date: &NaiveDate) -> Result<u64> {
+pub fn to_unix(date: &NaiveDate) -> anyhow::Result<u64> {
     let dt_unix = date
         .and_time(NaiveTime::from_hms_nano_opt(0, 0, 0, 0).unwrap())
         .and_utc()
