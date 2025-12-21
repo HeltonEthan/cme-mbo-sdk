@@ -1,7 +1,5 @@
-use dbn::{Action, BidAskPair, MboMsg, Side, UNDEF_PRICE};
+use dbn::{Action, MboMsg, Side, UNDEF_PRICE};
 use std::collections::{BTreeMap, HashMap, VecDeque};
-
-use crate::orderbook::pricelevel::PriceLevel;
 
 #[derive(Debug, Default)]
 pub struct Book {
@@ -13,72 +11,6 @@ pub struct Book {
 type Level = VecDeque<MboMsg>;
 
 impl Book {
-    pub fn bbo(&self) -> (Option<PriceLevel>, Option<PriceLevel>) {
-        (self.bid_level(0), self.ask_level(0))
-    }
-
-    pub fn bid_level(&self, idx: usize) -> Option<PriceLevel> {
-        self.bids
-            .iter()
-            // Reverse to get highest first
-            .rev()
-            .nth(idx)
-            .map(|(price, orders)| PriceLevel::new(*price, orders.iter()))
-    }
-
-    pub fn ask_level(&self, idx: usize) -> Option<PriceLevel> {
-        self.offers
-            .iter()
-            .nth(idx)
-            .map(|(price, orders)| PriceLevel::new(*price, orders.iter()))
-    }
-
-    pub fn bid_level_by_px(&self, px: i64) -> Option<PriceLevel> {
-        self.bids.get(&px).map(|orders| PriceLevel::new(px, orders.iter()))
-    }
-
-    pub fn ask_level_by_px(&self, px: i64) -> Option<PriceLevel> {
-        self.offers.get(&px).map(|orders| PriceLevel::new(px, orders.iter()))
-    }
-
-    pub fn order(&self, order_id: u64) -> Option<&MboMsg> {
-        let (side, price) = self.orders_by_id.get(&order_id)?;
-        let levels = self.side_levels(*side);
-        let level = levels.get(price)?;
-        level.iter().find(|order| order.order_id == order_id)
-    }
-
-    pub fn queue_pos(&self, order_id: u64) -> Option<u32> {
-        let (side, price) = self.orders_by_id.get(&order_id)?;
-        let levels = self.side_levels(*side);
-        let level = levels.get(price)?;
-        Some(
-            level
-                .iter()
-                .take_while(|order| order.order_id != order_id)
-                .fold(0, |acc, order| acc + order.size),
-        )
-    }
-
-    pub fn snapshot(&self, level_count: usize) -> Vec<BidAskPair> {
-        (0..level_count)
-            .map(|i| {
-                let mut ba_pair = BidAskPair::default();
-                if let Some(bid) = self.bid_level(i) {
-                    ba_pair.bid_px = bid.price;
-                    ba_pair.bid_sz = bid.size;
-                    ba_pair.bid_ct = bid.count;
-                }
-                if let Some(ask) = self.ask_level(i) {
-                    ba_pair.ask_px = ask.price;
-                    ba_pair.ask_sz = ask.size;
-                    ba_pair.ask_ct = ask.count;
-                }
-                ba_pair
-            })
-            .collect()
-    }
-
     pub fn apply(&mut self, mbo: MboMsg) {
         let action = mbo.action().unwrap();
         match action {
@@ -193,14 +125,6 @@ impl Book {
         match side {
             Side::Ask => &mut self.offers,
             Side::Bid => &mut self.bids,
-            Side::None => panic!("Invalid side None"),
-        }
-    }
-
-    fn side_levels(&self, side: Side) -> &BTreeMap<i64, Level> {
-        match side {
-            Side::Ask => &self.offers,
-            Side::Bid => &self.bids,
             Side::None => panic!("Invalid side None"),
         }
     }
