@@ -11,8 +11,13 @@ use dbn::{
 use fallible_streaming_iterator::FallibleStreamingIterator;
 use std::{fs::File, io::BufReader, path::PathBuf};
 
+type TsEvent = u64;
+
 /// Return type of logic, used to communicate with the engine
 pub enum Signal {
+    Trade(u64,  TsEvent), /// (order_id, TsEvent)
+    Cancel(u64, TsEvent), /// (order_id, TsEvent)
+    Modify(u64, TsEvent), /// (order_id, TsEvent)
     None
 }
 
@@ -35,7 +40,12 @@ pub fn run<F: FnMut(&MboMsg) -> Signal>(mut logic: F, cfg: &Config) -> anyhow::R
                 break
             }
             market.apply(mbo_msg.clone());
-            logic(mbo_msg);
+            match logic(mbo_msg) {
+                Signal::Trade(_order_id, _ts_event) => {},
+                Signal::Cancel(_order_id, _ts_event) => {},
+                Signal::Modify(_order_id, _ts_event) => {},
+                Signal::None => {},
+            }
         }
     }
     Ok(())
