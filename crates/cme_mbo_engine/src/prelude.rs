@@ -1,2 +1,5 @@
 pub use crate::config::Config;
-pub use crate::parser::stream::run;
+pub use crate::parser::stream::{
+    run,
+    Signal,
+};

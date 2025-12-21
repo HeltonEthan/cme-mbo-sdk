@@ -2,7 +2,6 @@ use crate::config::Config;
 use crate::orderbook::market::Market;
 use crate::parser::file;
 use dbn::{
-    Action,
     decode::{
         DecodeStream,
         dbn::{Decoder, MetadataDecoder},
@@ -12,12 +11,17 @@ use dbn::{
 use fallible_streaming_iterator::FallibleStreamingIterator;
 use std::{fs::File, io::BufReader, path::PathBuf};
 
+/// Return type of logic, used to communicate with the engine
+pub enum Signal {
+    None
+}
+
 /// Run is the entry point of the engine
 /// 
 /// It iterates through each file and creates a dbn stream for each,
 /// it passes a clone of mbo_msg to the limit orderbook for reconstruction. 
 /// Then passes a reference of mbo to the callback function 'logic'.
-pub fn run<F: FnMut(&MboMsg) -> Option<Action>>(mut logic: F, cfg: &Config) -> anyhow::Result<()> {
+pub fn run<F: FnMut(&MboMsg) -> Signal>(mut logic: F, cfg: &Config) -> anyhow::Result<()> {
     let start_unix = cfg.start_unix()?;
     let end_unix = cfg.end_unix()?;
     let mut market = Market::new();
