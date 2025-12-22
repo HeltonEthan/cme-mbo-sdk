@@ -5,14 +5,14 @@
 - [x] Decode dbn files & stream them
 - [x] Implment a callback into the live stream that recieves an mbo_msg
 - [x] Give the orderbook each mbo_msg
-- [] Implement threading across files
+- [x] Implement threading across files
 
 **Order book:**
 - [x] Implement order book reconstruction
 - [] Implement requested orders into live order book
 
 **Exchange**
-- [] Implement order creation (in progress)
+- [] Implement order creation
 - [] Implement FIFO matching algorithm
 - [] Implement ACK responses
 - [] Implement dynamic modification
