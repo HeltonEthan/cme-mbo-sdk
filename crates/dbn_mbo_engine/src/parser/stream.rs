@@ -20,7 +20,7 @@ use crate::prelude::*;
 /// it passes a clone of mbo_msg to the limit orderbook for reconstruction.
 /// Then passes a reference of mbo to the callback function 'logic' and a 'LatencyModel'.
 pub fn run<L, LF, LM, LMF>(cfg: &Config, logic_factory: LF,  latency_model_factory: LMF) -> anyhow::Result<()>
-where L: FnMut(&MboMsg) -> Option<Request> + Send, LF: Fn() -> L + Sync + Send, LM: LatencyModel + Send, LMF: Fn() -> LM + Sync + Send, {
+where L: FnMut(&MboMsg) -> Option<Request> + Send, LF: Fn() -> L + Sync + Send, LM: LatencyModel + Send, LMF: Fn() -> LM + Sync + Send {
     let start_unix = cfg.start_unix()?;
     let end_unix = cfg.end_unix()?;
     let paths  = file::get_files(&cfg)?;
