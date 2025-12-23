@@ -9,10 +9,7 @@ use fallible_streaming_iterator::FallibleStreamingIterator;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::{fs::File, io::BufReader, path::PathBuf};
 
-use crate::api::{
-    action::{Request},
-    latency::LatencyModel,
-};
+use crate::api::{action::Request, latency::LatencyModel};
 use crate::orderbook::market::Market;
 use crate::parser::file;
 use crate::prelude::*;
