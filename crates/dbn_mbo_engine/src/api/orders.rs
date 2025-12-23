@@ -1,8 +1,12 @@
 use std::collections::HashMap;
 
-use crate::api::action::OrderRequest;
+use crate::api::action::Order;
 
 pub struct Orders {
-    _queue_by_id: HashMap<u64, OrderRequest>,
-    _active_by_id: HashMap<u64, OrderRequest>,
+    queue_by_id: HashMap<u64, Order>,
+    active_by_id: HashMap<u64, Order>,
+}
+
+impl Orders {
+    
 }

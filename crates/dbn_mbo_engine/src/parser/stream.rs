@@ -10,7 +10,7 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::{fs::File, io::BufReader, path::PathBuf};
 
 use crate::api::{
-    action::{OrderRequest, Request},
+    action::{Order, Request},
     latency::LatencyModel,
 };
 use crate::orderbook::market::Market;
@@ -46,7 +46,7 @@ where
             }
             market.apply(mbo_msg.clone());
             if let Some(request) = logic(mbo_msg) {
-                OrderRequest::new(request, mbo_msg, &mut latency_model);
+                let _ = request;
             }
         }
         Ok(())

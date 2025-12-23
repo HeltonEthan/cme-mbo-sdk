@@ -7,7 +7,7 @@ use dbn_mbo_engine::{
 use std::path::PathBuf;
 
 // cargo test -p dbn_mbo_engine --test integration_engine engine_test --release
-// samply record 
+// samply record
 #[test]
 fn engine_test() -> anyhow::Result<()> {
     let cfg = Config::new(

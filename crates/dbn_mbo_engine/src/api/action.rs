@@ -1,50 +1,112 @@
-use dbn::{MboMsg, Side};
+use dbn::{Action, MboMsg, Side};
 
-use crate::api::latency::LatencyModel;
+use crate::api::latency::{self, LatencyModel};
 
-/// Request struct for making order
-#[derive(Debug, Clone)]
 pub enum Request {
-    New {
-        instrument_id: u32,
-        side: Side,
-        price: i64,
-        size: u32,
-    },
-    Cancel {
-        instrument_id: u32,
-        order_id: u64,
-    },
-    Modify {
-        instrument_id: u32,
-        order_id: u64,
-        new_price: Option<i64>,
-        new_size: Option<u32>,
-    },
+    Trade(TradeRequest),
+    Cancel(CancelRequest),
+    Modify(ModifyRequest),
 }
 
-#[allow(dead_code)]
-pub struct OrderRequest {
-    order_id: u64,
-    ts_event: u64,
-    ts_recv: u64,
-    request: Request,
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Ack {
+    
 }
 
-impl OrderRequest {
-    pub fn new<L: LatencyModel>(request: Request, mbo: &MboMsg, latency: &mut L) -> Self {
-        let ts_event = mbo.ts_recv;
-        let ts_recv = latency.ts_recv_sim(ts_event);
-        Self {
-            order_id: Self::set_order_id(mbo),
-            ts_event,
-            ts_recv,
-            request,
+impl Request {
+    pub fn process<LM: LatencyModel>(self, mbo: &MboMsg, latency: &mut LM) -> Ack {
+        match self {
+            Request::Trade(request) => request.submit(mbo, latency),
+            Request::Cancel(request) => request.submit(mbo, latency),
+            Request::Modify(request) => request.submit(mbo, latency),
         }
     }
+}
 
-    pub fn set_order_id(mbo: &MboMsg) -> u64 {
-        let _ = mbo;
+#[derive(Debug)]
+pub struct Order {
+    ts_recv: u64,
+    ts_event: u64,
+    instrument_id: u32,
+    action: Action,
+    side: Side,
+    price: Option<i64>,
+    size: Option<u32>,
+    order_id: Option<u64>,
+    state: OrderState,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum OrderState {
+    Pending,
+    Live,
+    Done,
+    Rejected,
+    Canceled,
+}
+
+impl Order {
+    pub fn new(ts_event: u64, ts_recv: u64, instrument_id: u32, action: Action, side: Side, price: Option<i64>, size: Option<u32>) -> Self {
+        Self {
+            ts_recv,
+            ts_event,
+            instrument_id,
+            action,
+            side,
+            price,
+            size,
+            order_id: None,
+            state: OrderState::Pending,
+        }
+    }
+}
+
+pub trait Submit {
+    fn submit<LM: LatencyModel>(&self, mbo: &MboMsg, latency: &mut LM) -> Ack;
+}
+
+#[derive(Debug)]
+pub struct TradeRequest {
+    pub instrument_id: u32,
+    pub side: Side,
+    pub price: i64,
+    pub size: u32,
+}
+
+impl TradeRequest {}
+
+impl Submit for TradeRequest {
+    fn submit<LM: LatencyModel>(&self, mbo: &MboMsg, latency: &mut LM) -> Ack {
+        todo!()
+    }
+}
+
+#[derive(Debug)]
+pub struct CancelRequest {
+    pub instrument_id: u32,
+    pub order_id: u64,
+}
+
+impl CancelRequest {}
+
+impl Submit for CancelRequest {
+    fn submit<LM: LatencyModel>(&self, mbo: &MboMsg, latency: &mut LM) -> Ack {
+        todo!()
+    }
+}
+
+#[derive(Debug)]
+pub struct ModifyRequest {
+    pub instrument_id: u32,
+    pub order_id: u64,
+    pub new_price: Option<i64>,
+    pub new_size: Option<u32>,
+}
+
+impl ModifyRequest {}
+
+impl Submit for ModifyRequest {
+    fn submit<LM: LatencyModel>(&self, mbo: &MboMsg, latency: &mut LM) -> Ack {
         todo!()
     }
 }
