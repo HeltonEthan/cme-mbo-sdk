@@ -8,3 +8,4 @@ anyhow = { workspace = true }
 dbn = { workspace = true }
 zstd = { workspace = true }
 fallible-streaming-iterator = { workspace = true }
+rtrb = { workspace = true }

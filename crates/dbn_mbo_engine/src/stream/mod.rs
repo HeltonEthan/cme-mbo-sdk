@@ -6,8 +6,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-mod parallel;
-mod serial;
+mod hotloop;
 
 pub(super) enum Ext {
     Zst,
