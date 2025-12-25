@@ -1,7 +1,7 @@
 pub mod config;
-mod enums;
+pub mod enums;
 mod error;
 mod normalize;
 pub mod prelude;
 pub mod run;
-mod stream;
+pub mod stream;

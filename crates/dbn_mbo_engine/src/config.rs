@@ -9,13 +9,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(
-        dir: PathBuf,
-        start: u64,
-        end: u64,
-        workers: usize,
-        qcap: usize,
-    ) -> Self {
+    pub fn new(dir: PathBuf, start: u64, end: u64, workers: usize, qcap: usize) -> Self {
         Self {
             dir,
             start,

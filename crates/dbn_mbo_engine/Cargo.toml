@@ -1,6 +1,6 @@
 [package]
 name = "dbn_mbo_engine"
-version = "0.1.1"
+version = "0.1.0"
 edition = "2024"
 
 [dependencies]
@@ -9,3 +9,4 @@ dbn = { workspace = true }
 zstd = { workspace = true }
 fallible-streaming-iterator = { workspace = true }
 rtrb = { workspace = true }
+chrono = { workspace = true }

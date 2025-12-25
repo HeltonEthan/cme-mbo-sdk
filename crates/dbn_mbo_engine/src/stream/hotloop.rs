@@ -1,4 +1,3 @@
-use std::{hint, sync::{Arc, atomic::{AtomicBool, Ordering}}, thread};
 use dbn::{
     FlagSet,
     decode::{DecodeStream, dbn::Decoder},
@@ -6,6 +5,14 @@ use dbn::{
 };
 use fallible_streaming_iterator::FallibleStreamingIterator;
 use rtrb::{Consumer, PopError, Producer, PushError, RingBuffer};
+use std::{
+    hint,
+    sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+    },
+    thread,
+};
 
 use crate::{
     config::Config,
@@ -90,7 +97,7 @@ impl ThreadPool {
                 Err(PushError::Full(returned)) => {
                     mbo = returned;
                     hint::spin_loop();
-                }
+                },
             }
         }
     }
@@ -115,10 +122,9 @@ fn worker_loop<RM, RA>(
     rx_mbo: &mut RM,
     rx_ack: &mut RA,
     running: Arc<AtomicBool>,
-)
-where 
+) where
     RM: FnMut(Mbo),
-    RA: FnMut(Ack)
+    RA: FnMut(Ack),
 {
     while running.load(Ordering::Acquire) {
         match cons.pop() {
@@ -128,7 +134,7 @@ where
             },
             Err(PopError::Empty) => {
                 hint::spin_loop();
-            }
+            },
         }
     }
     while let Ok(mbo) = cons.pop() {
@@ -137,7 +143,7 @@ where
 }
 
 #[allow(dead_code)]
-fn run<MF, AF, RM, RA>(cfg: &Config, rx_msg: RxMsg<MF, AF>) -> anyhow::Result<()>
+pub fn run<MF, AF, RM, RA>(cfg: &Config, rx_msg: RxMsg<MF, AF>) -> anyhow::Result<()>
 where
     MF: Fn() -> RM + Sync,
     AF: Fn() -> RA + Sync,
@@ -184,15 +190,5 @@ impl From<&MboMsg> for Mbo {
             order_id: msg.order_id,
             flags: msg.flags,
         }
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn hotloop_test() -> anyhow::Result<()> {
-        Ok(())
     }
 }
